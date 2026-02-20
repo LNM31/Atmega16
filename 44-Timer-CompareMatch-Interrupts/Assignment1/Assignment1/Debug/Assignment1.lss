@@ -1,0 +1,141 @@
+
+Assignment1.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000000b0  00000000  00000000  00000054  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00800060  00800060  00000104  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .comment      00000030  00000000  00000000  00000104  2**0
+                  CONTENTS, READONLY
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000134  2**2
+                  CONTENTS, READONLY
+  4 .debug_aranges 00000050  00000000  00000000  00000170  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   0000069d  00000000  00000000  000001c0  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 000005d0  00000000  00000000  0000085d  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_line   000002de  00000000  00000000  00000e2d  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  00000068  00000000  00000000  0000110c  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_str    00000342  00000000  00000000  00001174  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_ranges 00000030  00000000  00000000  000014b6  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 2a 00 	jmp	0x54	; 0x54 <__ctors_end>
+   4:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   8:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  10:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  14:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  18:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  1c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  20:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  24:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  28:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  2c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  30:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  34:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  38:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  3c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  40:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  44:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  48:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  4c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  50:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+
+00000054 <__ctors_end>:
+  54:	11 24       	eor	r1, r1
+  56:	1f be       	out	0x3f, r1	; 63
+  58:	cf e5       	ldi	r28, 0x5F	; 95
+  5a:	d4 e0       	ldi	r29, 0x04	; 4
+  5c:	de bf       	out	0x3e, r29	; 62
+  5e:	cd bf       	out	0x3d, r28	; 61
+  60:	0e 94 3e 00 	call	0x7c	; 0x7c <main>
+  64:	0c 94 56 00 	jmp	0xac	; 0xac <_exit>
+
+00000068 <__bad_interrupt>:
+  68:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+0000006c <led_init>:
+#include <util/delay.h>
+#include "./Timer-Header/timer.h"
+
+void led_init()
+{
+	DDRB |= (1 << PB0); // setup led (output)
+  6c:	b8 9a       	sbi	0x17, 0	; 23
+	PORTB &= ~(1 << PB0); //initially off 
+  6e:	c0 98       	cbi	0x18, 0	; 24
+  70:	08 95       	ret
+
+00000072 <led_toggle>:
+}
+void led_toggle()
+{
+	PORTB ^= (1 << PB0);
+  72:	98 b3       	in	r25, 0x18	; 24
+  74:	81 e0       	ldi	r24, 0x01	; 1
+  76:	89 27       	eor	r24, r25
+  78:	88 bb       	out	0x18, r24	; 24
+  7a:	08 95       	ret
+
+0000007c <main>:
+}
+
+int main(void)
+{	
+	led_init();
+  7c:	0e 94 36 00 	call	0x6c	; 0x6c <led_init>
+	timer_init();
+  80:	0e 94 4b 00 	call	0x96	; 0x96 <timer_init>
+    while (1) 
+    {
+		if((TIFR & (1 << OCF1A)) != 0) // compare match on channel 1 has occurred
+  84:	08 b6       	in	r0, 0x38	; 56
+  86:	04 fe       	sbrs	r0, 4
+  88:	fd cf       	rjmp	.-6      	; 0x84 <main+0x8>
+		{
+			led_toggle();
+  8a:	0e 94 39 00 	call	0x72	; 0x72 <led_toggle>
+			TIFR |= (1 << OCF1A);
+  8e:	88 b7       	in	r24, 0x38	; 56
+  90:	80 61       	ori	r24, 0x10	; 16
+  92:	88 bf       	out	0x38, r24	; 56
+  94:	f7 cf       	rjmp	.-18     	; 0x84 <main+0x8>
+
+00000096 <timer_init>:
+#include <util/delay.h>
+
+void timer_init()
+{
+	unsigned int value = COMPARE_VALUE;
+	OCR1AH = (value >> 8) & 0xFF; // setting the value of the comparator
+  96:	80 e7       	ldi	r24, 0x70	; 112
+  98:	8b bd       	out	0x2b, r24	; 43
+	OCR1AL = value & 0xFF;
+  9a:	80 e8       	ldi	r24, 0x80	; 128
+  9c:	8a bd       	out	0x2a, r24	; 42
+	
+	TCCR1B |= (1 << WGM12) | (1 << CS12); // CTC mode + prescalar 256 (CS12=1 CS11=0 CS10=0)
+  9e:	8e b5       	in	r24, 0x2e	; 46
+  a0:	8c 60       	ori	r24, 0x0C	; 12
+  a2:	8e bd       	out	0x2e, r24	; 46
+	TCCR1A &= ~(1 << WGM11) & ~(1 << WGM10); // CTC mode
+  a4:	8f b5       	in	r24, 0x2f	; 47
+  a6:	8c 7f       	andi	r24, 0xFC	; 252
+  a8:	8f bd       	out	0x2f, r24	; 47
+  aa:	08 95       	ret
+
+000000ac <_exit>:
+  ac:	f8 94       	cli
+
+000000ae <__stop_program>:
+  ae:	ff cf       	rjmp	.-2      	; 0xae <__stop_program>

@@ -1,0 +1,162 @@
+
+Assignment1.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000000c2  00000000  00000000  00000054  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00800060  00800060  00000116  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .comment      00000030  00000000  00000000  00000116  2**0
+                  CONTENTS, READONLY
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000148  2**2
+                  CONTENTS, READONLY
+  4 .debug_aranges 00000038  00000000  00000000  00000184  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   000006d6  00000000  00000000  000001bc  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 0000062b  00000000  00000000  00000892  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_line   000002a9  00000000  00000000  00000ebd  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  00000054  00000000  00000000  00001168  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_str    00000364  00000000  00000000  000011bc  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_loc    00000026  00000000  00000000  00001520  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000028  00000000  00000000  00001546  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 2a 00 	jmp	0x54	; 0x54 <__ctors_end>
+   4:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   8:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  10:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  14:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  18:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  1c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  20:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  24:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  28:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  2c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  30:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  34:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  38:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  3c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  40:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  44:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  48:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  4c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  50:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+
+00000054 <__ctors_end>:
+  54:	11 24       	eor	r1, r1
+  56:	1f be       	out	0x3f, r1	; 63
+  58:	cf e5       	ldi	r28, 0x5F	; 95
+  5a:	d4 e0       	ldi	r29, 0x04	; 4
+  5c:	de bf       	out	0x3e, r29	; 62
+  5e:	cd bf       	out	0x3d, r28	; 61
+  60:	0e 94 4c 00 	call	0x98	; 0x98 <main>
+  64:	0c 94 5f 00 	jmp	0xbe	; 0xbe <_exit>
+
+00000068 <__bad_interrupt>:
+  68:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+0000006c <TXRX_init>:
+#include <avr/interrupt.h>
+#include <util/delay.h>
+
+void TXRX_init()
+{
+	DDRD |= (1 << PD1); // output TX
+  6c:	89 9a       	sbi	0x11, 1	; 17
+	DDRD &= ~(1 << PD0); // input RX
+  6e:	88 98       	cbi	0x11, 0	; 17
+  70:	08 95       	ret
+
+00000072 <UART_init>:
+}
+void UART_init(unsigned int ubrr)
+{
+	/* Set baud rate */
+	UCSRC &= ~(1 << URSEL);
+  72:	20 b5       	in	r18, 0x20	; 32
+  74:	2f 77       	andi	r18, 0x7F	; 127
+  76:	20 bd       	out	0x20, r18	; 32
+	UBRRH = (unsigned char) (ubrr >> 8);
+  78:	90 bd       	out	0x20, r25	; 32
+	UBRRL = (unsigned char) ubrr;
+  7a:	89 b9       	out	0x09, r24	; 9
+	
+	/* set UCSRA */
+	UCSRA &= ~(1 << U2X) & ~(1 << MPCM);
+  7c:	8b b1       	in	r24, 0x0b	; 11
+  7e:	8c 7f       	andi	r24, 0xFC	; 252
+  80:	8b b9       	out	0x0b, r24	; 11
+	
+	/* Enable receiver and transmitter */
+	UCSRB |= (1 << TXEN) | (1 << RXEN);
+  82:	8a b1       	in	r24, 0x0a	; 10
+  84:	88 61       	ori	r24, 0x18	; 24
+  86:	8a b9       	out	0x0a, r24	; 10
+	
+	/* Enable UCSRC */
+	UCSRC |= (1 << URSEL) | (1 << UCSZ1) | (1 << UCSZ0);
+  88:	80 b5       	in	r24, 0x20	; 32
+  8a:	86 68       	ori	r24, 0x86	; 134
+  8c:	80 bd       	out	0x20, r24	; 32
+  8e:	08 95       	ret
+
+00000090 <UART_transmit>:
+}
+void UART_transmit(unsigned char data)
+{
+	while(!(UCSRA & (1 << UDRE)));
+  90:	5d 9b       	sbis	0x0b, 5	; 11
+  92:	fe cf       	rjmp	.-4      	; 0x90 <UART_transmit>
+	UDR = data; 
+  94:	8c b9       	out	0x0c, r24	; 12
+  96:	08 95       	ret
+
+00000098 <main>:
+}
+int main(void)
+{
+	TXRX_init();
+  98:	0e 94 36 00 	call	0x6c	; 0x6c <TXRX_init>
+	UART_init(MYUBRR);
+  9c:	8f e5       	ldi	r24, 0x5F	; 95
+  9e:	90 e0       	ldi	r25, 0x00	; 0
+  a0:	0e 94 39 00 	call	0x72	; 0x72 <UART_init>
+	   
+    while (1) 
+    {
+		UART_transmit('a');
+  a4:	81 e6       	ldi	r24, 0x61	; 97
+  a6:	0e 94 48 00 	call	0x90	; 0x90 <UART_transmit>
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  aa:	2f ef       	ldi	r18, 0xFF	; 255
+  ac:	8f ef       	ldi	r24, 0xFF	; 255
+  ae:	9c e2       	ldi	r25, 0x2C	; 44
+  b0:	21 50       	subi	r18, 0x01	; 1
+  b2:	80 40       	sbci	r24, 0x00	; 0
+  b4:	90 40       	sbci	r25, 0x00	; 0
+  b6:	e1 f7       	brne	.-8      	; 0xb0 <main+0x18>
+  b8:	00 c0       	rjmp	.+0      	; 0xba <main+0x22>
+  ba:	00 00       	nop
+  bc:	f3 cf       	rjmp	.-26     	; 0xa4 <main+0xc>
+
+000000be <_exit>:
+  be:	f8 94       	cli
+
+000000c0 <__stop_program>:
+  c0:	ff cf       	rjmp	.-2      	; 0xc0 <__stop_program>
